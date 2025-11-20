@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+    <!-- title -->
+
+
+    
+
+<!-- keywords -->
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="MaShiro">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="MaShiro">
+    
+        <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta name="description" content="前置知识 本文涉及到的两个核心公式分别来自Flow Matching与MeanFlow，分别是边缘速度场$\\\textit{u}_t(\\\textit{x})$的形式以及MeanFlow恒等式。在阅读本文前，需要对Flow Matching的基本原理，以及这两篇文章的内容有比较清晰的了解。 引言 在Mean Flows for One-step Generative Modeli">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARC Flows for One-step Generative Modeling">
+<meta property="og:url" content="http://m45hiro.github.io/2025/11/21/ARCFlow/index.html">
+<meta property="og:site_name" content="Elucidation, Derivation and Improvement of Generative Diffusion Models">
+<meta property="og:description" content="前置知识 本文涉及到的两个核心公式分别来自Flow Matching与MeanFlow，分别是边缘速度场$\\\textit{u}_t(\\\textit{x})$的形式以及MeanFlow恒等式。在阅读本文前，需要对Flow Matching的基本原理，以及这两篇文章的内容有比较清晰的了解。 引言 在Mean Flows for One-step Generative Modeli">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-20T16:40:41.158Z">
+<meta property="article:modified_time" content="2025-11-20T20:28:43.461Z">
+<meta property="article:author" content="MaShiro">
+<meta property="article:tag" content="Consistency Models">
+<meta property="article:tag" content="Diffusion Models">
+<meta property="article:tag" content="Flow Matching">
+<meta property="article:tag" content="MeanFlow">
+<meta name="twitter:card" content="summary">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" href="/assets/favicon.ico">
+    
+    <title>ARC Flows for One-step Generative Modeling · MaShiro&#39;s Studio</title>
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+    (function (w) {
+        'use strict'
+        // rel=preload support test
+        if (!w.loadCSS) {
+            w.loadCSS = function () {}
+        }
+        // define on the loadCSS obj
+        var rp = (loadCSS.relpreload = {})
+        // rel=preload feature support test
+        // runs once and returns a function for compat purposes
+        rp.support = (function () {
+            var ret
+            try {
+                ret = w.document.createElement('link').relList.supports('preload')
+            } catch (e) {
+                ret = false
+            }
+            return function () {
+                return ret
+            }
+        })()
+
+        // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+        // then change that media back to its intended value on load
+        rp.bindMediaToggle = function (link) {
+            // remember existing media attr for ultimate state, or default to 'all'
+            var finalMedia = link.media || 'all'
+
+            function enableStylesheet() {
+                link.media = finalMedia
+            }
+
+            // bind load handlers to enable media
+            if (link.addEventListener) {
+                link.addEventListener('load', enableStylesheet)
+            } else if (link.attachEvent) {
+                link.attachEvent('onload', enableStylesheet)
+            }
+
+            // Set rel and non-applicable media type to start an async request
+            // note: timeout allows this to happen async to let rendering continue in IE
+            setTimeout(function () {
+                link.rel = 'stylesheet'
+                link.media = 'only x'
+            })
+            // also enable media after 3 seconds,
+            // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+            setTimeout(enableStylesheet, 3000)
+        }
+
+        // loop through link elements in DOM
+        rp.poly = function () {
+            // double check this to prevent external calls from running
+            if (rp.support()) {
+                return
+            }
+            var links = w.document.getElementsByTagName('link')
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i]
+                // qualify links to those with rel=preload and as=style attrs
+                if (
+                    link.rel === 'preload' &&
+                    link.getAttribute('as') === 'style' &&
+                    !link.getAttribute('data-loadcss')
+                ) {
+                    // prevent rerunning on link
+                    link.setAttribute('data-loadcss', true)
+                    // bind listeners to toggle media back
+                    rp.bindMediaToggle(link)
+                }
+            }
+        }
+
+        // if unsupported, run the polyfill
+        if (!rp.support()) {
+            // run once at least
+            rp.poly()
+
+            // rerun poly on an interval until onload
+            var run = w.setInterval(rp.poly, 500)
+            if (w.addEventListener) {
+                w.addEventListener('load', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            } else if (w.attachEvent) {
+                w.attachEvent('onload', function () {
+                    rp.poly()
+                    w.clearInterval(run)
+                })
+            }
+        }
+
+        // commonjs
+        if (typeof exports !== 'undefined') {
+            exports.loadCSS = loadCSS
+        } else {
+            w.loadCSS = loadCSS
+        }
+    })(typeof global !== 'undefined' ? global : this)
+</script>
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20211217" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/css/dark.css?v=20211217" as="style">
+    <link rel="stylesheet" href="/css/dark.css">
+    <link rel="stylesheet" href="/css/mobile.css?v=20211217" media="(max-width: 960px)">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js?v=20211217" as="script">
+    <link rel="preload" href="/scripts/dark.js?v=20211217" as="script">
+    <link rel="preload" href="/font/Oswald-Regular.ttf" as="font" crossorigin>
+    <link rel="preload" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" as="font" crossorigin>
+    <!-- algolia -->
+    
+    <!-- 百度统计  -->
+    
+    <!-- Google tag (gtag.js) -->
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 8.1.1"></head>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ == undefined) {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js" />')
+        }
+    </script>
+    
+        <body class="post-body">
+    
+        <!-- header -->
+        <header class="header header-mobile">
+    <!-- top read progress line -->
+    <div class="header-element">
+        <div class="read-progress"></div>
+    </div>
+    <!-- sidebar menu button -->
+    <div class="header-element">
+        
+            <div class="header-sidebar-menu">
+        
+            
+                <div style="padding-left: 1px;">&#xe775;</div>
+            
+        </div>
+    </div>
+    <!-- header actions -->
+    <div class="header-actions">
+        <!-- theme mode switch button -->
+        <span class="header-theme-btn header-element">
+            <i class="fas fa-adjust"></i>
+        </span>
+        <!-- back to home page text -->
+        <span class="home-link header-element">
+            <a href=/>MaShiro's Studio.</a>
+        </span>
+    </div>
+    <!-- toggle banner for post layout -->
+    
+        
+            <div class="banner">
+        
+            <div class="blog-title header-element">
+                <a href="/">MaShiro&#39;s Studio.</a>
+            </div>
+            <div class="post-title header-element">
+                <a href="#" class="post-name">ARC Flows for One-step Generative Modeling</a>
+            </div>
+        </div>
+    
+</header>
+
+        <!-- fixed footer -->
+        <footer class="footer-fixed">
+    <!-- back to top button -->
+    <div class="footer-fixed-element">
+        
+            <div class="back-top back-top-hidden">
+        
+        
+            <div>&#xe639;</div>
+        
+        </div>
+    </div>
+</footer>
+
+        <!-- wrapper -->
+        <div class="wrapper">
+            <div class="site-intro" style="
+
+
+
+
+
+
+
+    height:50vh;
+
+">
+    
+    <!-- 主页  -->
+    
+        
+    <!-- 404页  -->
+    
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+                ARC Flows for One-step Generative Modeling
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+                
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页 meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="Diffusion Models">Diffusion Models</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="Flow Matching">Flow Matching</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="MeanFlow">MeanFlow</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags="Consistency Models">Consistency Models</a>
+    
+</div>
+
+                
+                <!-- 文章字数统计 -->
+                
+                <div class="post-intro-meta">
+                    <!-- 撰写日期 -->
+                    <span class="iconfont-archer post-intro-calander">&#xe676;</span>
+                    <span class="post-intro-time">2025/11/21</span>
+                    <!-- busuanzi -->
+                    
+                        <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                            <span class="iconfont-archer post-intro-busuanzi">&#xe602;</span>
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    
+                    <!-- 文章分享 -->
+                    <span class="share-wrapper">
+                        <span class="iconfont-archer share-icon">&#xe71d;</span>
+                        <span class="share-text">Share</span>
+                        <ul class="share-list">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+
+            <script>
+  // get user agent
+  function getBrowserVersions() {
+    var u = window.navigator.userAgent
+    return {
+      userAgent: u,
+      trident: u.indexOf('Trident') > -1, //IE内核
+      presto: u.indexOf('Presto') > -1, //opera内核
+      webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+      gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+      mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+      ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+      android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+      iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+      iPad: u.indexOf('iPad') > -1, //是否为iPad
+      webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+      weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+      uc: u.indexOf('UCBrowser') > -1, //是否为android下的UC浏览器
+    }
+  }
+  var browser = {
+    versions: getBrowserVersions(),
+  }
+  console.log('userAgent: ' + browser.versions.userAgent)
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded')
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document
+        .getElementsByClassName('intro-title')[0]
+        .classList.add('intro-fade-in')
+      document
+        .getElementsByClassName('intro-subtitle')[0]
+        .classList.add('intro-fade-in')
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in')
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb() {
+    if (browser.versions.uc) {
+      console.log('UCBrowser')
+      fontLoaded()
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular'],
+        },
+        loading: function () {
+          // 所有字体开始加载
+          // console.log('font loading');
+        },
+        active: function () {
+          // 所有字体已渲染
+          fontLoaded()
+        },
+        inactive: function () {
+          // 字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout')
+          fontLoaded()
+        },
+        timeout: 5000, // Set the timeout to two seconds
+      })
+    }
+  }
+
+  function asyncErr() {
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0]
+    o.src = u
+    if (cb) {
+      o.addEventListener(
+        'load',
+        function (e) {
+          cb(null, e)
+        },
+        false
+      )
+    }
+    if (err) {
+      o.addEventListener(
+        'error',
+        function (e) {
+          err(null, e)
+        },
+        false
+      )
+    }
+    s.parentNode.insertBefore(o, s)
+  }
+
+  var asyncLoadWithFallBack = function (arr, success, reject) {
+    var currReject = function () {
+      reject()
+      arr.shift()
+      if (arr.length) async(arr[0], success, currReject)
+    }
+
+    async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack(
+    [
+      'https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js',
+      'https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js',
+      "/lib/webfontloader.min.js",
+    ],
+    asyncCb,
+    asyncErr
+  )
+</script>
+
+            <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+            <div class="container container-unloaded">
+                <main class="main post-page">
+    <article class="article-entry">
+        <span id="more"></span>
+<h2 id="前置知识">前置知识</h2>
+<p>本文涉及到的两个核心公式分别来自<a
+target="_blank" rel="noopener" href="https://arxiv.org/abs/2210.02747">Flow Matching</a>与<a
+target="_blank" rel="noopener" href="https://arxiv.org/abs/2505.13447">MeanFlow</a>，分别是边缘速度场<span
+class="math inline">$\\\textit{u}_t(\\\textit{x})$</span>的形式以及MeanFlow恒等式。在阅读本文前，需要对Flow
+Matching的基本原理，以及这两篇文章的内容有比较清晰的了解。</p>
+<h2 id="引言">引言</h2>
+<p>在<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2505.13447">Mean Flows for One-step
+Generative Modeling</a>一文中，作者提出了基于一种物理一致性的<a
+target="_blank" rel="noopener" href="https://arxiv.org/abs/2303.01469">Consistency
+Model</a>，相比于传统的CMs或是sCM，MeanFlow，无需ema之类的操作，也不需要蒸馏，而是可以直接从头开始训练，得到一个具有少步生成能力的模型——随着步数的增加，MeanFlow的生成效果也会变好。但是MeanFlow的定义式存在对<span
+class="math inline">$\\\textit{u}_\theta(\\\textit{x},\\\textit{t},\\\textit{r})$</span>求关于<span
+class="math inline">$\\\textit{x}_r$</span>和<span
+class="math inline">$\\\textit{t}$</span>求偏导的项，因此训练的过程会极其复杂，计算量非常大。因此MeanFlow经常被诟病的问题就是难以训练，在复现时我也遇到了同样的问题。甚至Kaiming在github上传的项目中，足足在128*8的batch_size上训练了800k个iter。</p>
+<p>但是我们回顾MeanFlow，其实另一个与模型参数<span
+class="math inline">$\\\mathit{\theta}$</span>相关的项<span
+class="math inline">$\\\textit{u}_\theta(\\\textit{x},\\\textit{t},\\\textit{t})$</span>，作者并没有采用模型来估计，而是直接选取了条件速度场(Conditional
+Flow Matching)的形式，即认为<span
+class="math inline">$\\\textit{u}_\theta(\\\textit{x},\\\textit{t},\\\textit{t})=\\\textit{x}_1-\\\textit{x}_0$</span>。也就是说，作者认为边缘速度场与条件速度场在瞬时速度上的差异是不大的，这就给了我们启发：如果我们能将MeanFlow的定义式中的平均速度<span
+class="math inline">$\\\textit{u}_\theta(\\\textit{x},\\\textit{t},
+\\\textit{r})$</span>转化为某个确知的瞬时速度，是否就能够用条件速度场替代呢？这样，我们就能够直接求出偏导数的显式表达式了，而无需再通过雅各比之类的方法求导，能够节省相当多时间成本。</p>
+<h2 id="边缘速度场的一般形式">边缘速度场的一般形式</h2>
+<p>我们的想法是在边缘速度场里面寻找平均速度的替代形式。在Flow
+Matching一文中，我们显式定义了边缘速度场的形式，它等于： <span
+class="math display">$$
+\begin{equation}
+u_t(x)=\int v_t(x|x_1) \frac{p_t(x|x_1)q(x_1)}{p_t(x)}dx_1,
+\\\label{marginalvelocity}
+\tag{1}
+\end{equation}
+$$</span> 在这个式子中，我们按照EDM的定义，条件速度场被定义为： <span
+class="math display">$$
+\begin{equation}
+v_t(x|x_1)=\dot{f}(t)x_1 + \dot{g}(t)x_0
+\\\label{conditionalvelocity}
+\tag{2}
+\end{equation}
+$$</span> 它们满足边界条件： <span class="math display">$$
+\begin{equation}
+\begin{cases}
+f(0) = 0, \quad f(1) = 1\\
+g(0) = 1, \quad g(1) = 0
+\end{cases}
+\label{edgecondition}
+\tag{3}
+\end{equation}
+$$</span> 条件概率流的形式是一个高斯分布，满足： <span
+class="math display">$$
+\begin{equation}  
+p_t(x|x_1)\\\sim\mathcal{N}(x|f(t)x_1,g^2(t)\boldsymbol{I}),
+\label{conditionalpath}
+\tag{4}
+\end{equation}
+$$</span> 而两个边缘分布<span
+class="math inline">$\\\textit{q}(\\\textit{x}_1)$</span>和<span
+class="math inline">$\\\textit{p}_t(\\\textit{x})$</span>都是未知的。因此我们几乎无法显式计算得到<span
+class="math inline">$\\\textit{u}_t(\\\textit{x})$</span>的具体形式。连表达式都无法求解，我们还能怎么从中找到平均速度与边缘速度的关系呢？</p>
+<p>不妨先从简单的分布出发，假设<span
+class="math inline">$\\\textit{q}(\\\textit{x}_1),\\\textit{q}(\\\textit{x}_0)\sim
+\mathcal{N}(0,1)$</span>， 重新推导公式<span
+class="math inline">$\eqref{marginalvelocity}$</span>，显然概率的部分是一个标准的贝叶斯公式，即：</p>
+<p><span class="math display">$$
+\begin{equation}
+\frac{p_t(x|x_1)q(x_1)}{p_t(x)}=p_t(x_1|x),
+\label{bayes}
+\tag{5}
+\end{equation}
+$$</span></p>
+<p>那么整个积分式变为：</p>
+<p><span class="math display">$$
+\begin{equation}
+\begin{aligned}
+\int v_t(x|x_1) \frac{p_t(x|x_1)q(x_1)}{p_t(x)} dx_1 &amp;= \int
+v_t(x|x_1)p_t(x_1|x)dx_1 \\
+&amp;= \int (\dot{f}(t)x_1 + \dot{g}(t)x_0)p_t(x_1|x)dx_1,
+\end{aligned}
+\label{int1}
+\tag{6}
+\end{equation}
+$$</span></p>
+<p>由于<span
+class="math inline">$\\\textit{x}=\\\textit{f}(\\\textit{t})\\\textit{x}_1+\\\textit{g}(\\\textit{t})\\\textit{x}_0$</span>，那么公式<span
+class="math inline">$\eqref{int1}$</span>有 <span
+class="math display">$$
+\begin{equation}
+\begin{aligned}
+u_t(x) &amp;= \int (\dot{f}(t)x_1 + \dot{g}(t)x_0)p_t(x_1|x)dx_1\\
+&amp;= \int \left(\dot{f}(t)x_1 +
+\frac{\dot{g}(t)(x-f(t)x_1)}{g(t)}\right)p_t(x_1|x)dx_1\\
+&amp;= \int \left(\left(\dot{f}(t)-\frac{f(t)\dot{g}(t)}{g(t)}\right)x_1
++ \frac{\dot{g}(t)}{g(t)}x\right)p_t(x_1|x)dx_1\\
+&amp;= \left(\dot{f}(t)-\frac{f(t)\dot{g}(t)}{g(t)}\right)
+\underbrace{\int x_1 p_t(x_1|x)dx_1}_{\mathbb{E}[x_1|x]} +
+\frac{\dot{g}(t)}{g(t)}x \underbrace{\int p_t(x_1|x)dx_1}_{1},
+\end{aligned}
+\label{int2}
+\tag{7}
+\end{equation}
+$$</span></p>
+<p>注意到第一项积分等于<span
+class="math inline">$\\\textit{x}_1$</span>在<span
+class="math inline">$\\\textit{x}$</span>条件下的均值，第二项是概率密度函数的积分，显然等于<span
+class="math inline">$\\\textit{1}$</span>，由于<span
+class="math inline">$\\\textit{p}(\\\textit{x}_0)$</span>和<span
+class="math inline">$\\\textit{p}(x_1)$</span>都是高斯分布，它们的线性混合<span
+class="math inline">$\\\textit{p}_t(\\\textit{x})$</span>也是高斯分布。此时，后验均值<span
+class="math inline">$\mathbb{E}[\\\textit{x}_1|\\\textit{x}]$</span>具有解析形式：</p>
+<p><span class="math display">$$
+\begin{equation}
+\mathbb{E}[x_1|x] = \frac{f(t)}{f(t)^2+g(t)^2}x,
+\label{conditionalestimation}
+\tag{8}
+\end{equation}
+$$</span></p>
+<p>于是经过一些暴力的计算，我们就得到了边缘速度场<span
+class="math inline">$\\\textit{u}_t(\\\textit{x})$</span>的一般形式</p>
+<p><span class="math display">$$
+\begin{equation}
+\begin{aligned}
+u_t(x) &amp;= \left(\dot{f}(t)-\frac{f(t)\dot{g}(t)}{g(t)}\right)
+\left(\frac{f(t)}{f(t)^2+g(t)^2}x\right) + \frac{\dot{g}(t)}{g(t)}x \\
+&amp;= \left[ \frac{f(t)\dot{f}(t)}{f(t)^2+g(t)^2} -
+\frac{f(t)^2\dot{g}(t)}{g(t)(f(t)^2+g(t)^2)} + \frac{\dot{g}(t)}{g(t)}
+\right] x \\
+&amp;= \left[ \frac{f(t)\dot{f}(t)}{f(t)^2+g(t)^2} +
+\frac{\dot{g}(t)(-f(t)^2 + (f(t)^2+g(t)^2))}{g(t)(f(t)^2+g(t)^2)}
+\right] x \\
+&amp;= \left[ \frac{f(t)\dot{f}(t)}{f(t)^2+g(t)^2} +
+\frac{g(t)^2\dot{g}(t)}{g(t)(f(t)^2+g(t)^2)} \right] x \\
+&amp;= \frac{f(t)\dot{f}(t)+g(t)\dot{g}(t)}{f(t)^2+g(t)^2} x,
+\end{aligned}
+\label{marginalvelocityexpression}
+\tag{9}
+\end{equation}
+$$</span></p>
+<h2 id="accelerated-rectified-flow">Accelerated Rectified Flow</h2>
+<p>上述的推导中，<span class="math inline">$\\\textit{u},
+\\\textit{x}$</span>都是向量，我们暂时不要纠结那么多符号上的问题，只来关注这个形式。对于ReFlow而言，我们采用的瞬时速度<span
+class="math inline">$\\\textit{u}_t(\\\textit{x}|\\\textit{x}_1)$</span>是一个匀速直线运动，这意味着，我们希望<span
+class="math inline">$\\\textit{u}_t(\\\textit{x})$</span>关于<span
+class="math inline">$\\\textit{t}$</span>是一个常数，这能否实现呢。</p>
+<p>非常显然，这是无法实现的，当我们采用ReFlow的条件，令</p>
+<p><span class="math display">$$
+\begin{equation}
+f(t)=t, \\\quad g(t)=1-t,
+\label{reflow}
+\tag{10}
+\end{equation}
+$$</span></p>
+<p>代入边缘速度场的公式<span
+class="math inline">$\eqref{marginalvelocityexpression}$</span>，我们能够得到</p>
+<p><span class="math display">$$
+\begin{equation}
+u_t=\frac{2t-1}{2t^2-2t+1}x,
+\label{reflowmarginalvelocity}
+\tag{11}
+\end{equation}
+$$</span></p>
+<p>显然无法得到一个常数。</p>
+<p>退而求其次，我们看看这个<span
+class="math inline">$\\\textit{u}_t$</span>是否能够是个关于<span
+class="math inline">$\\\textit{t}$</span>的线性函数，也就是考虑</p>
+<p><span class="math display">$$
+\begin{equation}
+\frac{f(t)\dot{f}(t)+g(t)\dot{g}(t)}{f(t)^2+g(t)^2} x = (kt+b)x,
+\tag{12}
+\end{equation}
+$$</span></p>
+<p>我们又知道，在Flow
+Matching中，由Fokker-Planck定义了一个连续性条件，它在这里的直观表现就是<span
+class="math inline">$\\\textit{f}(\\\textit{t})+\\\textit{g}(\\\textit{t})=1$</span>，代入之后，经过复杂的微分方程计算，我们能够得到<span
+class="math inline">$\\\textit{f}(\\\textit{t})$</span>的一个具体形式：</p>
+<p><span class="math display">$$
+\begin{equation}
+f(t)=\frac{1}{2}(1-\sqrt{2e^{kt(1-t)}-1}), \\\quad or \\\quad
+f(t)=\frac{1}{2}(1+\sqrt{2e^{kt(1-t)}-1}),
+\tag{13}
+\end{equation}
+$$</span></p>
+<p>忽略非负解，我们令</p>
+<p><span class="math display">$$
+f(t)=-\frac{1}{2}(1-\sqrt{2e^{kt(1-t)}-1}),
+\tag{14}
+$$</span></p>
+<p>求它的二阶泰勒展开，我们能够得到</p>
+<p><span class="math display">$$
+f(t)=\frac{1}{2}kt(1-t),
+\\\label{arflow}
+\tag{15}
+$$</span></p>
+<p>结果非常惊人，它代表着，我们的条件速度场的定义式是一个匀加速直线运动！类似地，它的一阶泰勒公式等于<span
+class="math inline">$-\frac{\\\textit{k}}{\\\textit{2}}\\\textit{t}$</span>，刚好等于ReFlow的形式。但是非常显然，一阶泰勒展开的精度并不如二阶，且我们只要求边缘速度场是线性，而并没不能保证它是常数，这就意味着ReFlow得到的结果与边缘速度场的误差永远大于二阶泰勒的定义。我们称这个二阶泰勒为Accelerated
+Rectified Flow。</p>
+<p>公式<span
+class="math inline">$\eqref{arflow}$</span>告诉我们，如果让条件速度场是一个匀加速场，那么得到的边缘速度场也可以是一个线性匀加速场，且速度变化率与条件速度场完全一致！事实上，在实验中我们也验证了这个结果，在经典的8gaussian2moons问题中，我们得到的条件速度场与边缘速度场非常吻合！</p>
+<p>事实上，这个结果也是我在实验中偶然发现的，我发现原有的flow的速度大小总是在最终阶段突然下降，而改成了减速运动（加噪过程加速，去噪过程就是减速），得到的速度大小竟然出奇的吻合。这也很好理解，在生成初期，模型主要开始构建轮廓特征等，因此速度是比较大的，后面精细化纹理时，速度理应是比较小的。这和我们理论推导的结果也是不谋而合。</p>
+<p>这只是假设初末分布都是标准高斯的情况，在实际的训练过程中，这是没法满足的。但是其实我们在实验过程中发现，即使不满足标准高斯，得到的边缘速度场依然拟合的效果不错。</p>
+<h2 id="arcflow-accelerated-rectified-consistency-flow">ARCFlow:
+Accelerated Rectified Consistency Flow</h2>
+<p>这时候可能有人会有一些疑问，讲了这么多，一开始说的如何在瞬时速度场里面找到平均速度场的解析形式还是没有讲啊？现在我们已经得到了一个吻合相当好的匀变速边缘速度场。高中物理告诉我们，匀变速直线运动的质点，在任意时间段内，平均速度等于中间时刻的瞬时速度。那么这是不是意味着我们如果取中间时刻的瞬时速度作为平均速度的值，是否就能够直接得到解析形式的MeanFlow恒等式了呢？</p>
+<p>现在，让我们考虑MeanFlow恒等式，根据论文中的表述，它就等于： <span
+class="math display">$$
+\begin{equation}
+u_{\\\text{tgt}} = v(z_t, t) - (t - r) \\\left(v(z_t, t)
+\\\partial_{z_t} u_{\theta}(z_t, t, r) + \\\partial_t u_{\theta}(z_t, t,
+r)\\\right),
+\tag{16}
+\label{meanflowidentity}
+\end{equation}
+$$</span></p>
+<p><span
+class="math inline">$\\\textit{u}_{\theta}(\\\textit{z}_t,\\\textit{r})$</span>就是<span
+class="math inline">$[\\\textit{t},\\\textit{r}]$</span>时间段内的平均速度，。这里的<span
+class="math inline">$\\\textit{v}(\\\textit{z}_t,\\\textit{t})$</span>，原论文中采用了一种折中方案，认为<span
+class="math inline">$\\\textit{v}(\\\textit{z}_t,\\\textit{t})$</span>就等于条件速度场，也就是<span
+class="math inline">$\dot{\\\textit{f}}(\\\textit{t})-\dot{\\\textit{g}}(\\\textit{t})$</span>，在ReFlow的形式下，就等于<span
+class="math inline">$\\\textit{x}_1-\\\textit{x}_0$</span>。这里采用的实际上就是边缘速度场的一阶泰勒。而我们的方案也认为瞬时的条件速度场等于边缘速度场，但是我们采用了二阶泰勒，显然误差是小于一阶的。
+虽然
+MeanFlow做出的这个约束非常显然，但是它有一个最致命的问题，就是没办法计算右侧的两项偏导，只能通过雅各比计算梯度，在模型训练的时候又要计算一次梯度，虽然原论文用了stop_gradient来减小计算量，但是雅各比的计算仍然是一笔不小的开销。这其中最重要的原因就是没办法认为条件平均速度场等于边缘平均速度场，只能认为边缘瞬时速度场等于条件瞬时速度场。那么这时候，加速运动就派上用场了，前文已经证明了，我们的边缘瞬时速度场的线性性质足够好，因此可以认为一段时间内的边缘平均速度就等于中间时刻的瞬时速度：</p>
+<p><span class="math display">$$
+\begin{equation}
+u_{\theta}(z_t, t, r) = v_{\theta}(z_{\frac{t+r}{2}}, \frac{t+r}{2}) =
+\frac{1}{2}(v_{\theta}(z_t, t) + v_{\theta}(z_r, r)),
+\tag{17}
+\label{arcflowidentity}
+\end{equation}
+$$</span></p>
+<p>那么这个速度应该等于<span
+class="math inline">$\frac{1}{2}(\dot{\\\textit{f}}(\\\textit{t})-\dot{\\\textit{g}}(\\\textit{t})
++
+\dot{\\\textit{f}}(\\\textit{t})-\dot{\\\textit{g}}(\\\textit{t}))$</span>，将<span
+class="math inline">$\eqref{arflow}$</span>代入，我们就能够得到这个平均速度的表达式：</p>
+<p><span class="math display">$$
+\begin{equation}
+u_{\theta}(z_t, t, r) = (x_1-x_0)(2-t-r)
+\tag{18}
+\\\label{arcmeanvelocity}
+\end{equation}
+$$</span></p>
+<p>由于<span class="math inline">$\\\textit{x}_t$</span>关于<span
+class="math inline">$\\\textit{x}_1,\\\textit{x}_0,\\\textit{t}$</span>的表达式是已知的，因此我们最后就能够求出整个<span
+class="math inline">$\eqref{meanflowidentity}$</span>的右侧的两个偏微分的解析式，那么最终变为：</p>
+<p><span class="math display">$$
+v_{\theta}(z_r, r) = \frac{
+    u_{\theta}(z_r, t, r)
+    + (t - r) (x_1 - x_r) \left(\frac{2t + r - 3}{(r - 1)^3}\right)
+}{
+    1 - (t - r) \left(\frac{t + r - 2}{(r - 1)^2}\right)
+}
+\tag{19}
+\\\label{arcflowtarget}
+$$</span></p>
+<p>这里我们为了方便解释，将求导的对象改成了<span
+class="math inline">$\\\textit{r},\\\textit{r}&lt;\\\textit{t}$</span>，这样<span
+class="math inline">$\\\textit{u}_{\theta}(\\\textit{z}_r,\\\textit{t},\\\textit{r})$</span>的物理意义就是从<span
+class="math inline">$\\\textit{z}_r$</span>开始走到时间<span
+class="math inline">$\\\textit{t}$</span>的平均速度。等式的右边所有变量已知，等式的左边就等于条件速度场，也是已知。这样就能够直接进行训练，而不需要雅各比、
+stop_gradient、ema等一系列操作了。以上这个式子我们称为Accelerated
+Rectified Consistency Flow
+(ARCFlow)，它通过加速运动内在地整流了边缘速度场，使得其有较好的线性性质，换言之，更加接近了条件速度场。同时，线性性质又使得平均速度能够被计算，从而降低了计算量，减轻训练负担。后续的实验中，我们会逐步跟进实验结果，目前这个研究还停留在理论阶段，仍然存在一些训练不稳定，考虑在后续的实验中继续完善。Alea
+jacta est!，静待花开。</p>
+
+    </article>
+    <!-- license -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://M45hiro.github.io">MaShiro</a>
+            <p>原文链接：<a href="http://m45hiro.github.io/2025/11/21/ARCFlow/">http://m45hiro.github.io/2025/11/21/ARCFlow/</a>
+            <p>发表日期：<a href="http://m45hiro.github.io/2025/11/21/ARCFlow/">November 21st 2025, 12:40:41 am</a>
+            <p>更新日期：<a href="http://m45hiro.github.io/2025/11/21/ARCFlow/">November 21st 2025, 4:28:43 am</a>
+            <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+        </li>
+    </ul>
+    <!-- comment -->
+    
+        <div class="post-comment">
+            <!-- 来必力 City 版安装代码 -->
+
+
+            
+
+            
+
+            
+
+            <!-- utteranc评论 -->
+
+
+            <!-- partial('_partial/comment/changyan') -->
+            <!--PC版-->
+
+
+            
+            
+
+            
+
+        </div>
+    
+    <!-- timeliness note -->
+    <!-- idea from: https://hexo.fluid-dev.com/posts/hexo-injector/#%E6%96%87%E7%AB%A0%E6%97%B6%E6%95%88%E6%80%A7%E6%8F%90%E7%A4%BA -->
+    
+    <!-- Mathjax -->
+    
+        
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+
+    
+</main>
+
+                <!-- profile -->
+                
+            </div>
+            <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+        <div class="social">
+            
+    
+        
+            
+                <a href="mailto:syro_gzh@whu.edu.cn" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/M45hiro" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                    
+                    <img class="profile-qr" src="/assets/example_qr.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+
+        </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- website approve for Chinese user -->
+    
+    <!-- 不蒜子  -->
+    
+        <div class="busuanzi-container">
+            
+             
+                <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+            
+        </div>
+    	
+</footer>
+
+        </div>
+        <!-- toc -->
+        
+            <div class="toc-wrapper toc-wrapper-loding" style=
+
+
+
+
+
+
+
+    top:50vh;
+
+>
+                <div class="toc-catalog">
+                    <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+                </div>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-number">1.</span> <span class="toc-text">前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%B9%E7%BC%98%E9%80%9F%E5%BA%A6%E5%9C%BA%E7%9A%84%E4%B8%80%E8%88%AC%E5%BD%A2%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">边缘速度场的一般形式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#accelerated-rectified-flow"><span class="toc-number">4.</span> <span class="toc-text">Accelerated Rectified Flow</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#arcflow-accelerated-rectified-consistency-flow"><span class="toc-number">5.</span> <span class="toc-text">ARCFlow:
+Accelerated Rectified Consistency Flow</span></a></li></ol>
+            </div>
+        
+        <!-- sidebar -->
+        <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+        <div class="sidebar-panel-archives">
+    <!-- 在 ejs 中将 archive 按照时间排序 -->
+    
+        
+        
+        
+        
+        
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 1
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+        
+            
+            
+            <div class="archive-year"> 2025 </div>
+            <ul class="year-list">
+            
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/21</span>
+            <a class="archive-post-title" href="/2025/11/21/ARCFlow/">ARC Flows for One-step Generative Modeling</a>
+        </li>
+    
+    </div>
+</div>
+
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+        
+            <span class="sidebar-tag-name" data-tags="Diffusion Models">
+                <span class="iconfont-archer">&#xe606;</span>
+                Diffusion Models
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Flow Matching">
+                <span class="iconfont-archer">&#xe606;</span>
+                Flow Matching
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="MeanFlow">
+                <span class="iconfont-archer">&#xe606;</span>
+                MeanFlow
+            </span>
+        
+            <span class="sidebar-tag-name" data-tags="Consistency Models">
+                <span class="iconfont-archer">&#xe606;</span>
+                Consistency Models
+            </span>
+        
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+        缺失模块，请参考主题文档进行安装配置：https://github.com/fi3ework/hexo-theme-archer#%E5%AE%89%E8%A3%85%E4%B8%BB%E9%A2%98
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+
+    </div>
+</div>
+
+        <!-- site-meta -->
+        <script>
+    var siteMetaRoot = "/"
+    if (siteMetaRoot === "undefined") {
+        siteMetaRoot = '/'
+    }
+    var siteMeta = {
+        url: "http://M45hiro.github.io",
+        root: siteMetaRoot,
+        author: "MaShiro"
+    }
+</script>
+
+        <!-- import experimental options here -->
+        <!-- Custom Font -->
+
+
+        <!-- main func -->
+        <script src="/scripts/main.js?v=20211217"></script>
+        <!-- dark mode -->
+        <script src="/scripts/dark.js?v=20211217"></script>
+        <!-- fancybox -->
+        <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" defer></script>
+        <!-- algolia -->
+        
+        <!-- busuanzi -->
+        
+            <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+        
+        <!-- CNZZ -->
+        
+        <!-- async load share.js -->
+        
+            <script src="/scripts/share.js?v=20211217" async></script>
+        
+        <!-- mermaid -->
+        
+    </body>
+</html>
