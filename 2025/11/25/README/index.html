@@ -19,15 +19,15 @@
         <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
     
     <meta name="description" content="">
-    <meta name="description" content="渲染环境  格式：Markdown采用Typora编译格式，在source中的.md文件优先保证Typora渲染的有效性 插件版本  hexo: 8.1.1 hexo-cli: 4.3.2 hexo-renderer-pandoc@0.5.0   ## 行内公式 渲染格式 pandoc对于Typora格式的行内公式渲染是正常的，但是需要保证美元符号 $ $$ $ 与内">
+    <meta name="description" content="渲染环境  格式：Markdown采用Typora编译格式，在source中的.md文件优先保证Typora渲染的有效性 插件版本  hexo: 8.1.1 hexo-cli: 4.3.2 hexo-renderer-pandoc@0.5.0   ## 行内公式 我们首先要明白的是，Pandoc的渲染支持非常的蛋疼，某些公式即使不严格遵从我们下述的条件也是能够完美渲染的，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Typora中LateX的pandoc渲染与重编译">
+<meta property="og:title" content="Typora中LateX的Pandoc渲染与重编译">
 <meta property="og:url" content="http://m45hiro.github.io/2025/11/25/README/index.html">
 <meta property="og:site_name">
-<meta property="og:description" content="渲染环境  格式：Markdown采用Typora编译格式，在source中的.md文件优先保证Typora渲染的有效性 插件版本  hexo: 8.1.1 hexo-cli: 4.3.2 hexo-renderer-pandoc@0.5.0   ## 行内公式 渲染格式 pandoc对于Typora格式的行内公式渲染是正常的，但是需要保证美元符号 $ $$ $ 与内">
+<meta property="og:description" content="渲染环境  格式：Markdown采用Typora编译格式，在source中的.md文件优先保证Typora渲染的有效性 插件版本  hexo: 8.1.1 hexo-cli: 4.3.2 hexo-renderer-pandoc@0.5.0   ## 行内公式 我们首先要明白的是，Pandoc的渲染支持非常的蛋疼，某些公式即使不严格遵从我们下述的条件也是能够完美渲染的，">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-11-25T11:00:03.787Z">
-<meta property="article:modified_time" content="2025-11-25T10:59:45.522Z">
+<meta property="article:modified_time" content="2025-11-25T15:56:50.690Z">
 <meta property="article:author" content="MaShiro">
 <meta property="article:tag" content="Hexo">
 <meta property="article:tag" content="LateX">
@@ -39,7 +39,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <link rel="icon" href="/assets/favicon.ico">
     
-    <title>Typora中LateX的pandoc渲染与重编译 · MaShiro Mathyyyyy</title>
+    <title>Typora中LateX的Pandoc渲染与重编译 · MaShiro Mathyyyyy</title>
     <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
 /* This file is meant as a standalone workflow for
 - testing support for link[rel=preload]
@@ -269,7 +269,7 @@
                 <a href="/">Live Fast Die Young</a>
             </div>
             <div class="post-title header-element">
-                <a href="#" class="post-name">Typora中LateX的pandoc渲染与重编译</a>
+                <a href="#" class="post-name">Typora中LateX的Pandoc渲染与重编译</a>
             </div>
         </div>
     
@@ -315,7 +315,7 @@
         <h1 class="intro-title">
             <!-- 主页  -->
             
-                Typora中LateX的pandoc渲染与重编译
+                Typora中LateX的Pandoc渲染与重编译
             <!-- 404 -->
             
         </h1>
@@ -520,21 +520,76 @@
 </ul></li>
 </ul>
 <p>## 行内公式</p>
+<p>我们首先要明白的是，Pandoc的渲染支持非常的蛋疼，某些公式即使不严格遵从我们下述的条件也是能够完美渲染的，我们只是总结了实践中基本上大多数时候都能渲染成功的一种模式，从而将Typora能够渲染的格式替换为Pandoc能够大概率渲染成功的模式。</p>
 <h3 id="渲染格式">渲染格式</h3>
-<p>pandoc对于Typora格式的行内公式渲染是正常的，但是需要保证美元符号 $ $$
-$ 与内部的代码直接有空格，例如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ u_t $</span><br><span class="line">$u_t $</span><br><span class="line">$ u_t$</span><br></pre></td></tr></table></figure>
-<p>以上三种方式，只有第一种能够正常渲染</p>
-<h3 id="渲染样式">渲染样式</h3>
-<p>pandoc渲染后，hexo会默认使得行内公式的字体与正文相同，例如</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ u_t $</span><br></pre></td></tr></table></figure>
-<p>渲染得到的效果如下：</p>
+<p>Pandoc对于Typora格式的行内公式渲染是正常的，但是需要保证美元符号<code>$ $</code>与内部的代码直接没有空格（实测表明，添加了空格会让简单的公式渲染得到比较好的结果，也不用更改样式，但是无法渲染复杂公式），例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ u_t $</span><br><span class="line">$u_t $</span><br><span class="line">$ u_t$</span><br><span class="line">$u_t$</span><br></pre></td></tr></table></figure>
+<p>以上四种格式对于简单公式都能够正常渲染，但是前三种不支持复杂公式，例如当前的渲染效果如下：</p>
 <p>$ u_t $</p>
-<p>这个字体并不好看，为了得到我们想要的斜体，我们还需要对公式进行手动斜体，加粗也是同理，且斜体的，例如</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ \\\textit&#123;u&#125;_t $,	$ \\\textit&#123;\boldsymbol&#123;u&#125;&#125;_t $</span><br></pre></td></tr></table></figure>
-<p>经过实测，具有上下标的内容只需要对$ _
-$前面的内容添加斜体、加粗等样式即可，以上内容渲染得到的结果为：</p>
-<p>$ \_t $， $ \_t $</p>
+<p>$u_t $</p>
+<p>$ u_t$</p>
+<p><span class="math inline"><em>u</em><sub><em>t</em></sub></span></p>
+<p>复杂一些的公式的渲染效果：</p>
+<p>$ p(u_t|_t) $</p>
+<p>$p(u_t|_t) $</p>
+<p>$ p(u_t|_t)$</p>
+<p><span
+class="math inline"><em>p</em>(<em>u</em><sub><em>t</em></sub>|<strong>x</strong><sub><em>t</em></sub>)</span></p>
+<p><strong>因此我们采用第四种格式用于渲染</strong></p>
+<h3 id="渲染样式">渲染样式</h3>
+<p>采用第四种格式，通过Pandoc渲染后，Hexo会默认使得行内公式的字体与正文相同，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$u_t$</span><br></pre></td></tr></table></figure>
+<p>渲染得到的效果是这样的：$ u_t $</p>
+<p>这个字体并不好看，为了得到我们想要的斜体，我们还需要对公式进行手动斜体，加粗也是同理，在我们的实测中，如果采用了<code>\boldsymbol</code>加粗，就无需再使用斜体，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$\\\textit&#123;p&#125;(\\\textit&#123;u&#125;_t|\\\boldsymbol&#123;x&#125;_t)$</span><br></pre></td></tr></table></figure>
+<p>值得一提的是，所有的样式代码，以及特殊符号，简而言之，所有带有<code>\</code>的部分，我们全部对其进行转义，这样虽然很麻烦，但是一定不会出错。经过实测，具有上下标的内容只需要对<code>_</code>前面的内容添加斜体、加粗等样式即可，以上内容渲染得到的结果为：</p>
+<p><span
+class="math inline">$\\\textit{p}(\\\textit{u}_t|\\\boldsymbol{x}_t,\\\boldsymbol{y}^*)$</span></p>
+<p>对于更加复杂的行内公式也可以支持：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$\\\left(\\\dot&#123;\\\textit&#123;f&#125;&#125;(t)-\\\frac&#123;\\\textit&#123;f&#125;(\\\textit&#123;t&#125;)\\\dot&#123;\\\textit&#123;g&#125;&#125;(\\\textit&#123;t&#125;)&#125;&#123;\\\textit&#123;g&#125;(\\\textit&#123;t&#125;)&#125;\\\right) \\\underbrace&#123;\\\int \\\textit&#123;x&#125;_1 \\\textit&#123;p&#125;_t(\\\textit&#123;x&#125;_1|\\\textit&#123;x&#125;)\\\textit&#123;dx&#125;_1&#125;_&#123;\\\mathbb&#123;E&#125;[\\\textit&#123;x&#125;_1|\\\textit&#123;x&#125;]&#125; + \\\frac&#123;\\\dot&#123;\\\textit&#123;g&#125;&#125;(\\\textit&#123;t&#125;)&#125;&#123;\\\textit&#123;g&#125;(\\\textit&#123;t&#125;)&#125;\\\textit&#123;x&#125; \\\underbrace&#123;\\\int \\\textit&#123;p&#125;_t(\\\textit&#123;x&#125;_1|\\\textit&#123;x&#125;)\\\textit&#123;dx&#125;_1&#125;_&#123;1&#125;$</span><br></pre></td></tr></table></figure>
+<p>这里的公式：</p>
+<p><span
+class="math inline">$\\\left(\\\dot{\\\textit{f}}(t)-\\\frac{\\\textit{f}(\\\textit{t})\\\dot{\\\textit{g}}(\\\textit{t})}{\\\textit{g}(\\\textit{t})}\\\right)
+\\\underbrace{\\\int \\\textit{x}_1
+\\\textit{p}_t(\\\textit{x}_1|\\\textit{x})\\\textit{dx}_1}_{\\\mathbb{E}[\\\textit{x}_1|\\\textit{x}]}
++
+\\\frac{\\\dot{\\\textit{g}}(\\\textit{t})}{\\\textit{g}(\\\textit{t})}\\\textit{x}
+\\\underbrace{\\\int
+\\\textit{p}_t(\\\textit{x}_1|\\\textit{x})\\\textit{dx}_1}_{1}$</span></p>
+<p>这里最恶心的点在于，斜体不能直接在最外层给，否则编译不出来，只能一个字母一个字母给</p>
+<h3 id="正则表达式">正则表达式</h3>
+<p>综上所述的几条规律，我们能够设计出一条通用的针对行内公式的正则化编译：</p>
+<ul>
+<li><p>格式审查</p>
+<p>消除所有美元符号前后的空格，将所有<code>$ | $</code>和全部替换为<code>$</code></p></li>
+<li><p>字母抓取</p>
+<ul>
+<li>这一步我们要提取所有公式中的字母部分（非特殊符号部分）以为其添加斜体，首先我们忽略所有<code>\\</code>后接任意个数字母的形式<code>\\[a-z]+</code>，在这其中，我们还要排除掉<code>\\boldsymbol\{[a-z]+\}</code>的形式。此时，公式中只剩下了字母，数字和符号，然后我们忽略掉数字和符号，其中，<code>\_[a-zA-Z]+</code>这样的形式也要忽略，因为我们不希望对下划线后的部分添加斜体（会报错，因为需要花括号），最后直接在其中直接提取字母<code>[a-z]+</code>就可以了。</li>
+</ul></li>
+<li><p>字母斜体的添加</p>
+<ul>
+<li>提取除了加粗字母以外的字母之后，我们就可以对字母进行斜体添加了，将这些部分替换为<code>\\\\\\textit{·}</code>即可</li>
+</ul></li>
+<li><p>转义</p>
+<ul>
+<li>这个很简单，将<code>\\</code>替换为<code>\\\\\\</code>即可</li>
+</ul></li>
+</ul>
+<h2 id="行间公式">行间公式</h2>
+<p>经过我们的测试，行间公式只有在出现<code>\label \notag \quad</code>时可能会出问题，需要转义，直接全部替换即可</p>
+<p>下面给出我们的替换代码，这里为什么用Python没用C++，因为实验室这台电脑疑似没有配C++环境，所以我就先拿Python应急处理了一下。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Compiler</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        :str path: path of markdowns to be compiled</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="variable language_">self</span>.path = path</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">md_file_paths</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [</span><br><span class="line">            os.path.join(root, file)</span><br><span class="line">            <span class="keyword">for</span> root, _, files <span class="keyword">in</span> os.walk(<span class="variable language_">self</span>.path)</span><br><span class="line">            <span class="keyword">for</span> file <span class="keyword">in</span> files</span><br><span class="line">            <span class="keyword">if</span> file.lower().endswith(<span class="string">&quot;.md&quot;</span>)</span><br><span class="line">        ]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">rectify</span>(<span class="params">self, content</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Remove spaces around $ unless inside backticks&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> re.sub(<span class="string">r&#x27;(?&lt;!`)\$ | \$ (?!`)&#x27;</span>, <span class="string">&#x27;$&#x27;</span>, content)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">readMarkdown</span>(<span class="params">self, md_file_path</span>):</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(md_file_path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            content = f.read()</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.rectify(content)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">getSingleEquations</span>(<span class="params">self, markdown_content</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Return list of inline equations&quot;&quot;&quot;</span></span><br><span class="line">        cleaned = re.sub(<span class="string">r&#x27;`.*?`&#x27;</span>, <span class="string">&#x27;&#x27;</span>, markdown_content, flags=re.DOTALL)</span><br><span class="line">        <span class="keyword">return</span> re.findall(<span class="string">r&#x27;(?&lt;!\$)\$(?!\$)(.*?)(?&lt;!\$)\$(?!\$)&#x27;</span>, cleaned, flags=re.DOTALL)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">innerExpressionCompile</span>(<span class="params">self, expression, backslash_replacement=<span class="string">&quot;\\\\\\&quot;</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Compile inline math expression&quot;&quot;&quot;</span></span><br><span class="line">        regexEscape = <span class="string">r&quot;(\\boldsymbol\&#123;[^\&#125;]+\&#125;|\\[a-zA-Z]+)&quot;</span></span><br><span class="line">        escape_iter = <span class="built_in">list</span>(re.finditer(regexEscape, expression))</span><br><span class="line">        escape_spans = [(m.start(), m.end(), m.group()) <span class="keyword">for</span> m <span class="keyword">in</span> escape_iter]</span><br><span class="line"></span><br><span class="line">        regexSub = <span class="string">r&quot;_[a-zA-Z]+&quot;</span></span><br><span class="line">        sub_spans = []</span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(regexSub, expression):</span><br><span class="line">            s, e = m.start(), m.end()</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">any</span>(es &lt;= s &lt; ee <span class="keyword">for</span> es, ee, _ <span class="keyword">in</span> escape_spans):</span><br><span class="line">                sub_spans.append((s, e, m.group()))</span><br><span class="line"></span><br><span class="line">        regexOther = <span class="string">r&quot;[^\\\sA-Za-z_]&quot;</span></span><br><span class="line">        other_spans = []</span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(regexOther, expression):</span><br><span class="line">            s, e = m.start(), m.end()</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">any</span>(es &lt;= s &lt; ee <span class="keyword">for</span> es, ee, _ <span class="keyword">in</span> escape_spans) <span class="keyword">and</span> \</span><br><span class="line">               <span class="keyword">not</span> <span class="built_in">any</span>(ss &lt;= s &lt; se <span class="keyword">for</span> ss, se, _ <span class="keyword">in</span> sub_spans):</span><br><span class="line">                other_spans.append((s, e, m.group()))</span><br><span class="line"></span><br><span class="line">        regexLetters = <span class="string">r&quot;[a-zA-Z]+&quot;</span></span><br><span class="line">        taken = <span class="built_in">set</span>()</span><br><span class="line">        <span class="keyword">for</span> s, e, _ <span class="keyword">in</span> escape_spans + other_spans:</span><br><span class="line">            taken.update(<span class="built_in">range</span>(s, e))</span><br><span class="line">        letters_spans = []</span><br><span class="line">        <span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(regexLetters, expression):</span><br><span class="line">            s, e = m.start(), m.end()</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">all</span>(i <span class="keyword">not</span> <span class="keyword">in</span> taken <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(s, e)):</span><br><span class="line">                letters_spans.append((s, e, m.group()))</span><br><span class="line">                taken.update(<span class="built_in">range</span>(s, e))</span><br><span class="line"></span><br><span class="line">        all_spans = []</span><br><span class="line">        <span class="keyword">for</span> s, e, t <span class="keyword">in</span> escape_spans:</span><br><span class="line">            all_spans.append((s, e, <span class="string">&#x27;escape&#x27;</span>, t))</span><br><span class="line">        <span class="keyword">for</span> s, e, t <span class="keyword">in</span> sub_spans:</span><br><span class="line">            all_spans.append((s, e, <span class="string">&#x27;sub&#x27;</span>, t))</span><br><span class="line">        <span class="keyword">for</span> s, e, t <span class="keyword">in</span> other_spans:</span><br><span class="line">            all_spans.append((s, e, <span class="string">&#x27;other&#x27;</span>, t))</span><br><span class="line">        <span class="keyword">for</span> s, e, t <span class="keyword">in</span> letters_spans:</span><br><span class="line">            all_spans.append((s, e, <span class="string">&#x27;letters&#x27;</span>, t))</span><br><span class="line">        all_spans.sort(key=<span class="keyword">lambda</span> x: x[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">        out_parts = []</span><br><span class="line">        idx = <span class="number">0</span></span><br><span class="line">        span_idx = <span class="number">0</span></span><br><span class="line">        n = <span class="built_in">len</span>(expression)</span><br><span class="line">        <span class="keyword">while</span> idx &lt; n:</span><br><span class="line">            <span class="keyword">if</span> span_idx &lt; <span class="built_in">len</span>(all_spans) <span class="keyword">and</span> all_spans[span_idx][<span class="number">0</span>] == idx:</span><br><span class="line">                s, e, typ, text = all_spans[span_idx]</span><br><span class="line">                <span class="keyword">if</span> typ == <span class="string">&#x27;escape&#x27;</span>:</span><br><span class="line">                    out_parts.append(text.replace(<span class="string">&quot;\\&quot;</span>, backslash_replacement))</span><br><span class="line">                <span class="keyword">elif</span> typ == <span class="string">&#x27;sub&#x27;</span> <span class="keyword">or</span> typ == <span class="string">&#x27;other&#x27;</span>:</span><br><span class="line">                    out_parts.append(text)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    out_parts.append(<span class="string">&quot;\\\\\\textit&#123;&quot;</span> + text + <span class="string">&quot;&#125;&quot;</span>)</span><br><span class="line">                idx = e</span><br><span class="line">                span_idx += <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                out_parts.append(expression[idx])</span><br><span class="line">                idx += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>.join(out_parts)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">compile</span>(<span class="params">self</span>):</span><br><span class="line">        md_paths = <span class="variable language_">self</span>.md_file_paths</span><br><span class="line">        output_dir = os.path.join(os.path.dirname(<span class="variable language_">self</span>.path), <span class="string">&quot;output&quot;</span>)</span><br><span class="line">        os.makedirs(output_dir, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> md_path <span class="keyword">in</span> md_paths:</span><br><span class="line">            content = <span class="variable language_">self</span>.readMarkdown(md_path)</span><br><span class="line"></span><br><span class="line">            </span><br><span class="line">            <span class="comment"># Inline equations</span></span><br><span class="line">            inline_eqs = <span class="variable language_">self</span>.getSingleEquations(content)</span><br><span class="line">            <span class="keyword">for</span> eq <span class="keyword">in</span> inline_eqs:</span><br><span class="line">                compiled = <span class="variable language_">self</span>.innerExpressionCompile(eq)</span><br><span class="line">                content = content.replace(<span class="string">f&quot;$<span class="subst">&#123;eq&#125;</span>$&quot;</span>, <span class="string">f&quot;$<span class="subst">&#123;compiled&#125;</span>$&quot;</span>)</span><br><span class="line">            </span><br><span class="line">            content = content.replace(<span class="string">r&#x27;\label&#x27;</span>, <span class="string">r&#x27;\\\label&#x27;</span>)</span><br><span class="line">            content = content.replace(<span class="string">r&#x27;\quad&#x27;</span>, <span class="string">r&#x27;\\\quad&#x27;</span>)</span><br><span class="line">            content = content.replace(<span class="string">r&#x27;\notag&#x27;</span>, <span class="string">r&#x27;\\\notag&#x27;</span>)</span><br><span class="line">            </span><br><span class="line">            </span><br><span class="line">            <span class="comment"># Write output</span></span><br><span class="line">            out_path = os.path.join(output_dir, os.path.basename(md_path))</span><br><span class="line">            <span class="keyword">with</span> <span class="built_in">open</span>(out_path, <span class="string">&quot;w&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">                f.write(content)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> output_dir</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># -------------------------------</span></span><br><span class="line"><span class="comment"># Example usage</span></span><br><span class="line"><span class="comment"># -------------------------------</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    compiler = Compiler(<span class="string">&quot;source&quot;</span>)</span><br><span class="line">    out_dir = compiler.<span class="built_in">compile</span>()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Compiled markdown output to:&quot;</span>, out_dir)</span><br></pre></td></tr></table></figure>
+<h2 id="语法规则">语法规则</h2>
+<ul>
+<li>Typora能够编译的一般情况都不会出问题</li>
+<li>在行内公式中尽量不要使用，尽量手动打tab，如果用了，可能需要你把转义字符更改回来</li>
+<li>label和tag最好写在公式equation与aligned之间</li>
+<li>使用aligned而不是align</li>
+<li>equation一定要打，如果有aligned，也要在外层包裹equation</li>
+<li>尽量不要换出空行，保持紧凑</li>
+<li>以下是我们的测试代码，编译结果放在下一篇博客中</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">Thus we can provide a posterior distribution merely dependent on the joint distribution $p(\boldsymbol&#123;u&#125;_t,\boldsymbol&#123;v&#125;_t)$, which can be sampled easily and precisely. Next, we consider how to formulate the mapping from the joint distribution to the posterior distribution. Typically used methods are Bayesian estimation or classifier-free guidance. Inevitably, the maximum posterior estimation required for Bayesian estimation is straightly upon with the prior knowledge of different tasks, while the classifier-free guidance is related to the quality of the representation extracted from joint distribution, which fails to accurately extract features from the source images cause its high correlation with noise standard in diffusion process. Fortunately, benefit from the analytical nature of our $p(\boldsymbol&#123;u&#125;_t, \boldsymbol&#123;v&#125;_t)$, it&#x27;s possible to provide a close-form of posterior distribution. Likewise, we should employ the previously introduced neighborhood condition in this step. Firstly, according to Bayes&#x27; theorem</span><br><span class="line"></span><br><span class="line">$$</span><br><span class="line">\begin&#123;equation&#125;</span><br><span class="line">\begin&#123;aligned&#125;</span><br><span class="line">&amp;\nabla_&#123;\boldsymbol&#123;x_t&#125;&#125; \log p(\boldsymbol&#123;x&#125;_t|\hat&#123;\boldsymbol&#123;u&#125;&#125;_t,\hat&#123;\boldsymbol&#123;v&#125;&#125;_t) \notag\\</span><br><span class="line">&amp;= \nabla_&#123;\boldsymbol&#123;x_t&#125;&#125; \log p(\boldsymbol&#123;x&#125;_t) + \nabla_&#123;\boldsymbol&#123;x_t&#125;&#125; \log p(\hat&#123;\boldsymbol&#123;u&#125;&#125;_t,\hat&#123;\boldsymbol&#123;v&#125;&#125;_t|\boldsymbol&#123;x&#125;_t),</span><br><span class="line">\end&#123;aligned&#125;</span><br><span class="line">\end&#123;equation&#125;</span><br><span class="line">$$</span><br><span class="line"></span><br><span class="line">it is worth noting that in the neighborhood $\Theta$, $x_t, \hat&#123;\boldsymbol&#123;u&#125;&#125;_t, \hat&#123;\boldsymbol&#123;v&#125;&#125;_t$ can be approximate expressed as</span><br><span class="line"></span><br><span class="line">$$</span><br><span class="line">\begin&#123;equation&#125;</span><br><span class="line">\begin&#123;aligned&#125;</span><br><span class="line">&amp;\nabla_&#123;\boldsymbol&#123;x&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;u&#125;&#125;_t, \hat&#123;\boldsymbol&#123;v&#125;&#125;_t|\boldsymbol&#123;x&#125;_t) \\</span><br><span class="line">&amp;=\nabla_&#123;\boldsymbol&#123;x&#125;_t + \boldsymbol&#123;\delta&#125;&#125; \log p(\hat&#123;\boldsymbol&#123;u&#125;&#125;_t, \hat&#123;\boldsymbol&#123;v&#125;&#125;_t|\boldsymbol&#123;x&#125;_t + \boldsymbol&#123;\delta&#125;)\notag\\</span><br><span class="line">&amp;= \nabla_&#123;\hat&#123;\boldsymbol&#123;u&#125;&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;u&#125;&#125;_t|\hat&#123;\boldsymbol&#123;u&#125;&#125;_t) + \nabla_&#123;\hat&#123;\boldsymbol&#123;v&#125;&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;v&#125;&#125;_t|\hat&#123;\boldsymbol&#123;v&#125;&#125;_t)\notag\\</span><br><span class="line">&amp;= \nabla_&#123;\hat&#123;\boldsymbol&#123;u&#125;&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;u&#125;&#125;_t) + \nabla_&#123;\hat&#123;\boldsymbol&#123;v&#125;&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;v&#125;&#125;_t),</span><br><span class="line">\end&#123;aligned&#125;</span><br><span class="line">\label&#123;neighbor&#125;</span><br><span class="line">\end&#123;equation&#125;</span><br><span class="line">$$</span><br><span class="line"></span><br><span class="line">then</span><br><span class="line"></span><br><span class="line">$$</span><br><span class="line">\begin&#123;equation&#125;</span><br><span class="line">\begin&#123;aligned&#125;</span><br><span class="line">&amp;\nabla_&#123;\boldsymbol&#123;x_t&#125;&#125; \log p(\boldsymbol&#123;x&#125;_t|\hat&#123;\boldsymbol&#123;u&#125;&#125;_t,\hat&#123;\boldsymbol&#123;v&#125;&#125;_t) \notag\\</span><br><span class="line">&amp;= \nabla_&#123;\boldsymbol&#123;x_t&#125;&#125; \log p(\boldsymbol&#123;x&#125;_t) + \nabla_&#123;\hat&#123;\boldsymbol&#123;u&#125;&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;u&#125;&#125;_t) + \nabla_&#123;\hat&#123;\boldsymbol&#123;v&#125;&#125;_t&#125; \log p(\hat&#123;\boldsymbol&#123;v&#125;&#125;_t).</span><br><span class="line">\end&#123;aligned&#125;</span><br><span class="line">\label&#123;fsrvs&#125;</span><br><span class="line">\end&#123;equation&#125;</span><br><span class="line">$$</span><br><span class="line"></span><br><span class="line">Consequently, a closed-form posterior distribution can be derived, relying only on the unconditional generative distribution and the source image distributions along the forward diffusion process. The unconditional distribution is obtained via a pre-trained DDPM, whereas the source image distributions are computed directly from the forward process. </span><br></pre></td></tr></table></figure>
 
     </article>
     <!-- license -->
@@ -543,13 +598,18 @@ $前面的内容添加斜体、加粗等样式即可，以上内容渲染得到�
             <p>原文作者：<a href="http://M45hiro.github.io">MaShiro</a>
             <p>原文链接：<a href="http://m45hiro.github.io/2025/11/25/README/">http://m45hiro.github.io/2025/11/25/README/</a>
             <p>发表日期：<a href="http://m45hiro.github.io/2025/11/25/README/">November 25th 2025, 7:00:03 pm</a>
-            <p>更新日期：<a href="http://m45hiro.github.io/2025/11/25/README/">November 25th 2025, 6:59:45 pm</a>
+            <p>更新日期：<a href="http://m45hiro.github.io/2025/11/25/README/">November 25th 2025, 11:56:50 pm</a>
             <p>版权声明：本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
     <!-- paginator -->
     <ul class="post-paginator">
         <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href="/2025/11/25/testcompile/" title="Typora中LateX的Pandoc渲染与重编译（二）">
+                    <div class="nextTitle">Typora中LateX的Pandoc渲染与重编译（二）</div>
+                </a>
             
         </li>
         <li class="previous">
@@ -711,7 +771,7 @@ $前面的内容添加斜体、加粗等样式即可，以上内容渲染得到�
                 <div class="toc-catalog">
                     <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
                 </div>
-                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B8%B2%E6%9F%93%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">渲染环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B2%E6%9F%93%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">渲染格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B2%E6%9F%93%E6%A0%B7%E5%BC%8F"><span class="toc-number">1.2.</span> <span class="toc-text">渲染样式</span></a></li></ol></li></ol>
+                <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B8%B2%E6%9F%93%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">渲染环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B2%E6%9F%93%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.1.</span> <span class="toc-text">渲染格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B2%E6%9F%93%E6%A0%B7%E5%BC%8F"><span class="toc-number">1.2.</span> <span class="toc-text">渲染样式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">1.3.</span> <span class="toc-text">正则表达式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%8C%E9%97%B4%E5%85%AC%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">行间公式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95%E8%A7%84%E5%88%99"><span class="toc-number">3.</span> <span class="toc-text">语法规则</span></a></li></ol>
             </div>
         
         <!-- sidebar -->
@@ -735,7 +795,14 @@ $前面的内容添加斜体、加粗等样式即可，以上内容渲染得到�
         
         
         
+        
+        
+        
+        
+        
     
+        
+        
         
         
     
@@ -744,7 +811,7 @@ $前面的内容添加斜体、加粗等样式即可，以上内容渲染得到�
     
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 2
+        Total : 3
         </div>
         <!-- search  -->
         
@@ -776,7 +843,22 @@ $前面的内容添加斜体、加粗等样式即可，以上内容渲染得到�
         
         <li class="archive-post-item">
             <span class="archive-post-date">Invalid date</span>
-            <a class="archive-post-title" href="/2025/11/25/README/">Typora中LateX的pandoc渲染与重编译</a>
+            <a class="archive-post-title" href="/2025/11/25/README/">Typora中LateX的Pandoc渲染与重编译</a>
+        </li>
+    
+        
+            
+            
+                
+                </ul>
+            
+            <div class="archive-year"> Invalid date </div>
+            <ul class="year-list">
+            
+        
+        <li class="archive-post-item">
+            <span class="archive-post-date">Invalid date</span>
+            <a class="archive-post-title" href="/2025/11/25/testcompile/">Typora中LateX的Pandoc渲染与重编译（二）</a>
         </li>
     
     </div>
